@@ -32,7 +32,7 @@ def game():
         for name in living_players:
             player = name2ins[name]
 
-            wolf_name, session= player.chat("day", history, living_players)
+            wolf_name, session = player.chat("day", history, living_players)
 
             history.append({"player":name, "conversation":session})
 
