@@ -10,8 +10,7 @@ name2ins = {"player1":wolf1,"player2":wolf2,"player3":vill1,"player4":vill2,"pla
 all_players = [wolf1,wolf2,vill1,vill2,proph]
 living_players = ["player1","player4","player3","player5","player2"]
 
-
-
+wolf_players = ["player1","player2"]
 
 def count_wolf():
     cnt = 0
@@ -38,23 +37,46 @@ def game():
         '''
         # 狼人杀人
         host_message = create_game_message("host","天黑请闭眼。狼人请睁眼，狼人请投票决定杀人")
-
-        vote = {"player1":0,"player2":0,"player3":0,"player4":0,"player5":0}
-
         history.append(host_message)    
-
-        # import pdb
-        # pdb.set_trace()
-
         print(history[-1])
-        # 狼人杀人：
+        #投票队列
+        vote = {name:0 for name in living_players}
+        wolf_history = []
+
+        # 狼人讨论：
         for name in living_players:
             player = name2ins[name]
             if player.role != "wolf":
                 continue
-            kill_name = player.chat("night", history, living_players)
-            vote[kill_name] += 1
-        
+            session = player.talk_night(history, living_players, wolf_players, wolf_history)
+            wolf_history.append(session)
+
+        #狼人杀人：
+        for name in living_players:
+            player = name2ins[name]
+            if player.role != "wolf":
+                continue
+            name = player.kill_night(history, living_players, wolf_players, wolf_history)
+            vote[name] += 1
+
+
+        # 预言家查验身份
+        host_message = create_game_message("host","预言家请睁眼，请决定你要查验的身份")
+        history.append(host_message) 
+        print(history[-1])
+
+        for name in living_players:
+            player = name2ins[name]
+            if player.role != "prophet":
+                continue
+
+            check_name = player.check(history, living_players)
+            identity = name2ins[check_name].role
+            player.update_identity(check_name, identity)
+            print(f"验查了玩家{check_name},身份是{identity}")
+            break
+
+        # 夜晚结算
         voted_kill = find_max(vote)
         voted_role = name2ins[voted_kill].role
 
@@ -77,19 +99,7 @@ def game():
             history.append(host_message)
             print(history[-1])
         
-        # 预言家查验身份
-        host_message = create_game_message("host","预言家请睁眼，请决定你要查验的身份")
-        history.append(host_message) 
-        print(history[-1])
-        for name in living_players:
-            player = name2ins[name]
-            if player.role != "prophet":
-                continue
-
-            check_name = player.chat("night", history, living_players)
-            identity = name2ins[check_name].role
-            player.update_identity(check_name, identity)
-            print(f"验查了玩家{check_name},身份是{identity}")
+    
         
 
         '''
@@ -99,12 +109,14 @@ def game():
         history.append(host_message) 
         print(history[-1])
 
-        vote = {"player1":0,"player2":0,"player3":0,"player4":0,"player5":0}
+        vote = {name:0 for name in living_players}
 
         for name in living_players:
             player = name2ins[name]
-
-            wolf_name, session = player.chat("day", history, living_players)
+            if player.role == "wolf":
+                wolf_name, session = player.vote_day(history, living_players, wolf_players)
+            else:
+                wolf_name, session = player.vote_day(history, living_players)
 
             player_message = create_game_message(name,session)
 
@@ -114,9 +126,6 @@ def game():
 
         voted_wolf = find_max(vote)
 
-        if voted_wolf not in living_players:
-            import pdb
-            pdb.set_trace()
         living_players.remove(voted_wolf)
         
         host_message = create_game_message("host","天亮请睁眼，现在每个人需要对狼人投票")

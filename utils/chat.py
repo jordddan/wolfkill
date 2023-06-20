@@ -19,17 +19,31 @@ def single_chat(content,role=None):
                 {"role":"system","content":role},
                 {"role":"user","content":content}
                 ]
+    flag = False
+    cnt = 0
+    while flag == False:
+        response = openai.ChatCompletion.create(engine="mtutor-openai-dev",
+                                messages = messages,
+                                temperature=0.5,)
 
-    response = openai.ChatCompletion.create(engine="mtutor-openai-dev",
-                            messages = messages,
-                            temperature=0.5,)
+        try:
+            res = response["choices"][0]["message"]["content"]
+            flag = True
+        except:
+            flag = False
+        cnt += 1
+        if cnt >= 3:
+            break
+    if flag == False:
+        response = openai.ChatCompletion.create(engine="mtutor-openai-dev",
+                                messages = messages,
+                                temperature=0.5,)
 
-    try:
-        res = response["choices"][0]["message"]["content"]
-    except:
-        import pdb
-        pdb.set_trace()
-
+        try:
+            res = response["choices"][0]["message"]["content"]
+        except:
+            import pdb
+            pdb.set_trace()
     return  res
 
 def multi_chat(input_list, reply_list, role = None):
