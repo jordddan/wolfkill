@@ -1,6 +1,6 @@
 import openai
 import os
-from key import key
+from utils.key import key
 os.environ["OPENAI_API_KEY"] = key
 openai.api_type = "azure"
 
@@ -22,9 +22,13 @@ def single_chat(content,role=None):
 
     response = openai.ChatCompletion.create(engine="mtutor-openai-dev",
                             messages = messages,
-                            temperature=0,)
-    res = response["choices"][0]["message"]["content"]
+                            temperature=0.5,)
 
+    try:
+        res = response["choices"][0]["message"]["content"]
+    except:
+        import pdb
+        pdb.set_trace()
 
     return  res
 
