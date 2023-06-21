@@ -26,7 +26,8 @@ class VillagerAgent:
 
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        role_text = f"{game_intro} \n {self.role_prompt}"
+        name_text = f"你是{self.name}"
+        role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         content = (
                 f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
                 f"这是当前还活着的玩家：{living_text}\n"
@@ -42,7 +43,7 @@ class VillagerAgent:
         wolf_name = response["name"]
         speak = response["speak"]
         session = f"我是 {self.name}, 我认为{wolf_name}是狼人，我是这么想的,{speak}"
-
+        print(f"{self.name}, {output}")
         return wolf_name, session
 
 class WolfAgent:
@@ -58,7 +59,8 @@ class WolfAgent:
 
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        role_text = f"{game_intro} \n {self.role_prompt}"
+        name_text = f"你是{self.name}"
+        role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         team_mate_text = json.dumps(wolf_team_mate,ensure_ascii=False,indent=2)
         content = (
                 f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
@@ -78,14 +80,15 @@ class WolfAgent:
         wolf_name = response["name"]
         speak = response["speak"]
         session = f"我是 {self.name}, 我认为{wolf_name}是狼人，我是这么想的,{speak}"
-
+        print(f"{self.name}, {response}")
         return wolf_name, session
 
     def talk_night(self, history, living_players, wolf_team_mate, wolf_history):
         
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        role_text = f"{game_intro} \n {self.role_prompt}"
+        name_text = f"你是{self.name}"
+        role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         team_mate_text = json.dumps(wolf_team_mate,ensure_ascii=False,indent=2)
         wolf_history_text = json.dumps(wolf_history,ensure_ascii=False,indent=2)
         content = (
@@ -99,14 +102,15 @@ class WolfAgent:
         output = single_chat(content=content,role=role_text)
 
         session = f"我是{self.name}, {output}"
-
+        print(f"{self.name}, {output}")
         return session
 
 
     def kill_night(self, history, living_players, wolf_team_mate, wolf_history):
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        role_text = f"{game_intro} \n {self.role_prompt}"
+        name_text = f"你是{self.name}"
+        role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         team_mate_text = json.dumps(wolf_team_mate,ensure_ascii=False,indent=2)
         wolf_history_text = json.dumps(wolf_history,ensure_ascii=False,indent=2)
 
@@ -128,6 +132,7 @@ class WolfAgent:
         thought = response["thought"]
         session = f"我是 {self.name}, 我想杀{kill_name}，我是这么想的,{thought}"
         print(session)
+        print(f"{self.name}, {response}")
         return kill_name
 
 
@@ -145,7 +150,8 @@ class ProphetAgent():
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
         identity_text = json.dumps(self.identity_list,ensure_ascii=False,indent=2)
-        role_text = f"{game_intro} \n {self.role_prompt}"
+        name_text = f"你是{self.name}"
+        role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         content = (
                 f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
                 f"这是当前还活着的玩家：{living_text}\n"
@@ -162,14 +168,15 @@ class ProphetAgent():
         wolf_name = response["name"]
         speak = response["speak"]
         session = f"我是 {self.name}, 我认为{wolf_name}是狼人，我是这么想的,{speak}"
-
+        print(f"{self.name}, {response}")
         return wolf_name, session
 
     def check(self, history, living_players):
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
         identity_text = json.dumps(self.identity_list,ensure_ascii=False,indent=2)
-        role_text = f"{game_intro} \n {self.role_prompt}"
+        name_text = f"你是{self.name}"
+        role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         content = (
                 f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
                 f"这是当前还活着的玩家：{living_text}\n"
@@ -184,7 +191,7 @@ class ProphetAgent():
             raise TypeError("The output of AI can not be converted to json")
         
         check_name = response["name"]
-
+        print(f"{self.name}, {response}")
         return check_name
 
     def update_identity(self, name, identity):
