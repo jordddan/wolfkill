@@ -1,11 +1,15 @@
 from agents.base_agent import WolfAgent, VillagerAgent, ProphetAgent
 import json
 from utils.common_utils import find_max
-wolf1 = WolfAgent("player1")
-wolf2 = WolfAgent("player2")
-vill1 = VillagerAgent("player3")
-vill2 = VillagerAgent("player4")
-proph = ProphetAgent("player5")
+from chat.gpt4_chat import single_chat as gpt4
+from chat.gpt3_chat import single_chat as gpt3
+
+wolf1 = WolfAgent("player1",gpt3)
+wolf2 = WolfAgent("player2",gpt3)
+vill1 = VillagerAgent("player3",gpt3)
+vill2 = VillagerAgent("player4",gpt3)
+proph = ProphetAgent("player5",gpt3)
+
 name2ins = {"player1":wolf1,"player2":wolf2,"player3":vill1,"player4":vill2,"player5":proph}
 all_players = [wolf1,wolf2,vill1,vill2,proph]
 living_players = ["player1","player4","player3","player5","player2"]
@@ -27,7 +31,7 @@ def create_game_message(role, session):
 def game():
 
     history = []
-    host_message = create_game_message("host","现在游戏开始，请大家做好准备")
+    host_message = create_game_message("host","The game is starting now. Please get ready, everyone.")
     history.append(host_message)
     print(history[-1])
     while True:
@@ -36,7 +40,7 @@ def game():
             NIGHT
         '''
         # 狼人杀人
-        host_message = create_game_message("host","天黑请闭眼。狼人请睁眼，狼人请投票决定杀人")
+        host_message = create_game_message("host","Close your eyes, it's nighttime. Werewolves, open your eyes. Werewolves, vote now to decide whom to execute.")
         history.append(host_message)    
         print(history[-1])
         #投票队列
@@ -61,7 +65,7 @@ def game():
 
 
         # 预言家查验身份
-        host_message = create_game_message("host","预言家请睁眼，请决定你要查验的身份")
+        host_message = create_game_message("host","Prophet, open your eyes. Please decide which identity you want to investigate.")
         history.append(host_message) 
         print(history[-1])
 
@@ -73,7 +77,7 @@ def game():
             check_name = player.check(history, living_players)
             identity = name2ins[check_name].role
             player.update_identity(check_name, identity)
-            print(f"验查了玩家{check_name},身份是{identity}")
+            print(f"The identity of {check_name} has been checked ,his identity is {identity}")
             break
 
         # 夜晚结算
@@ -82,7 +86,7 @@ def game():
 
         living_players.remove(voted_kill)
 
-        host_message = create_game_message("host",f"狼人杀死了{voted_kill},被杀死的玩家的身份是{voted_role}")
+        host_message = create_game_message("host",f"The wolves killed {voted_kill}, he is a {voted_role}")
 
         history.append(host_message)
         print(history[-1])
@@ -105,7 +109,7 @@ def game():
         '''
            DAY 
         '''
-        host_message = create_game_message("host","天亮请睁眼，现在每个人需要对狼人投票")
+        host_message = create_game_message("host","Please open your eyes at dawn. Now everyone needs to vote for the werewolf.")
         history.append(host_message) 
         print(history[-1])
 
@@ -128,16 +132,13 @@ def game():
 
         living_players.remove(voted_wolf)
         
-        host_message = create_game_message("host","天亮请睁眼，现在每个人需要对狼人投票")
-        history.append(host_message)
-        print(history[-1])
 
         if name2ins[voted_wolf].role == "wolf":
-            host_message = create_game_message("host",f"投票结果为玩家{voted_wolf}，玩家{voted_wolf}是狼人，{voted_wolf}已经出局。")
+            host_message = create_game_message("host",f"The voting result is {voted_wolf}. {voted_wolf} is wolf {voted_wolf} The player has been eliminated.")
             history.append(host_message)
             print(history[-1])
         else:
-            host_message = create_game_message("host",f"投票结果为玩家{voted_wolf}。玩家{voted_wolf}, 不是狼人，好人冤死。")
+            host_message = create_game_message("host",f"The voting result is {voted_wolf}. {voted_wolf}, is not wolf, the innocent people has been unjustly killed.")
             history.append(host_message)
             print(history[-1])
 
@@ -145,6 +146,7 @@ def game():
         if cnt_wolf == 0:
             print("Good Peaple Wins")
             break
+        
 
     return 
 

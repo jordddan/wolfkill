@@ -1,5 +1,3 @@
-
-from utils.chat import single_chat,multi_chat
 from prompt.role import role_villager, role_wolf, role_prophet, game_intro
 from prompt.output import output_villager, output_wolf_day, output_wolf_talk_night, output_wolf_kill_night, output_prophet_day, output_prophet_night
 import json
@@ -16,25 +14,25 @@ class BaseAgnet:
     
 class VillagerAgent:
 
-    def __init__(self, name):
+    def __init__(self, name, chat_func):
         self.name = name
         self.role = "villager"
         self.role_prompt = role_villager
         self.output_day = output_villager
-    
+        self.chat = chat_func
     def vote_day(self, history, living_players):
 
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        name_text = f"你是{self.name}"
+        name_text = f"You are {self.name}"
         role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         content = (
-                f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
-                f"这是当前还活着的玩家：{living_text}\n"
+                f"This is the previous game content, saved in JSON format, with each entry representing a conversation: {history_text}\n"
+                f"These are the players who are currently alive: {living_text}\n"
                 f"{self.output_day}"
         )
         
-        output = single_chat(content=content,role=role_text)
+        output = self.chat(content=content,role=role_text)
         try:
             response = json.loads(output)
         except:
@@ -42,12 +40,12 @@ class VillagerAgent:
         
         wolf_name = response["name"]
         speak = response["speak"]
-        session = f"我是 {self.name}, 我认为{wolf_name}是狼人，我是这么想的,{speak}"
+        session = f"I am {self.name}, I think {wolf_name} is wolf, here is what I thought {speak}"
         print(f"{self.name}, {output}")
         return wolf_name, session
 
 class WolfAgent:
-    def __init__(self, name):
+    def __init__(self, name, chat_func):
         self.name = name
         self.role = "wolf"
         self.role_prompt = role_wolf
@@ -55,21 +53,23 @@ class WolfAgent:
         self.output_wolf_kill_night = output_wolf_kill_night
         self.output_wolf_talk_night = output_wolf_talk_night
 
+        self.chat = chat_func
     def vote_day(self, history, living_players, wolf_team_mate):
 
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        name_text = f"你是{self.name}"
+        name_text = f"You are {self.name}"
         role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         team_mate_text = json.dumps(wolf_team_mate,ensure_ascii=False,indent=2)
+
         content = (
-                f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
-                f"这是当前还活着的玩家：{living_text}\n"
-                f"同样是狼人的玩家是: {team_mate_text}\n" 
+                f"This is the previous game content, saved in JSON format, with each entry representing a conversation: {history_text}\n"
+                f"These are the players who are currently alive:{living_text}\n"
+                f"The players who are also werewolves are: {team_mate_text}\n" 
                 f"{self.output_day}"
         )
         
-        output = single_chat(content=content,role=role_text)
+        output = self.chat(content=content,role=role_text)
         try:
             response = json.loads(output)
         except:
@@ -79,7 +79,7 @@ class WolfAgent:
         
         wolf_name = response["name"]
         speak = response["speak"]
-        session = f"我是 {self.name}, 我认为{wolf_name}是狼人，我是这么想的,{speak}"
+        session = f"I am {self.name}, i think {wolf_name}is wolf, here is what I thought {speak}"
         print(f"{self.name}, {response}")
         return wolf_name, session
 
@@ -87,21 +87,22 @@ class WolfAgent:
         
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        name_text = f"你是{self.name}"
+        name_text = f"You are {self.name}"
         role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         team_mate_text = json.dumps(wolf_team_mate,ensure_ascii=False,indent=2)
         wolf_history_text = json.dumps(wolf_history,ensure_ascii=False,indent=2)
         content = (
-                f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
-                f"这是当前还活着的玩家：{living_text}\n"
-                f"同样是狼人的玩家是: {team_mate_text}\n" 
-                f"这是之前你的狼人队友们的聊天: {wolf_history_text}\n"
+                f"This is the previous game content, saved in JSON format, with each entry representing a conversation: {history_text}\n"
+                f"These are the players who are currently alive:{living_text}\n"
+                f"The players who are also werewolves are: {team_mate_text}\n" 
+                f"These are the previous statements of your wolf teammates: {wolf_history_text}\n"
                 f"{self.output_wolf_talk_night}"
         )
-        
-        output = single_chat(content=content,role=role_text)
 
-        session = f"我是{self.name}, {output}"
+
+        output = self.chat(content=content,role=role_text)
+
+        session = f"I am {self.name}, {output}"
         print(f"{self.name}, {output}")
         return session
 
@@ -109,20 +110,20 @@ class WolfAgent:
     def kill_night(self, history, living_players, wolf_team_mate, wolf_history):
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        name_text = f"你是{self.name}"
+        name_text = f"You are{self.name}"
         role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         team_mate_text = json.dumps(wolf_team_mate,ensure_ascii=False,indent=2)
         wolf_history_text = json.dumps(wolf_history,ensure_ascii=False,indent=2)
 
         content = (
-                f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
-                f"这是当前还活着的玩家：{living_text}\n"
-                f"同样是狼人的玩家是: {team_mate_text}\n" 
-                f"这是之前你的狼人队友们的聊天: {wolf_history_text}\n"
+                f"This is the previous game content, saved in JSON format, with each entry representing a conversation: {history_text}\n"
+                f"These are the players who are currently alive: {living_text}\n"
+                f"The players who are also werewolves are: {team_mate_text}\n" 
+                f"These are the previous statements of your wolf teammates:  {wolf_history_text}\n"
                 f"{self.output_wolf_kill_night}"
         )
         
-        output = single_chat(content=content,role=role_text)
+        output = self.chat(content=content,role=role_text)
         try:
             response = json.loads(output)
         except:
@@ -130,7 +131,7 @@ class WolfAgent:
         
         kill_name = response["name"]
         thought = response["thought"]
-        session = f"我是 {self.name}, 我想杀{kill_name}，我是这么想的,{thought}"
+        session = f"I am  {self.name}, i want to kill {kill_name}, here is what I thought: {thought}"
         print(session)
         print(f"{self.name}, {response}")
         return kill_name
@@ -138,28 +139,28 @@ class WolfAgent:
 
 class ProphetAgent():
 
-    def __init__(self, name, game_prompt=None):
+    def __init__(self, name, chat_func):
         self.name = name
         self.role = "prophet"
         self.role_prompt = role_prophet
         self.output_day = output_prophet_day
         self.output_check = output_prophet_night
         self.identity_list = []
-
+        self.chat = chat_func
     def vote_day(self, history, living_players):
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
         identity_text = json.dumps(self.identity_list,ensure_ascii=False,indent=2)
-        name_text = f"你是{self.name}"
+        name_text = f"You are {self.name}"
         role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         content = (
-                f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
-                f"这是当前还活着的玩家：{living_text}\n"
-                f"这是你已经知道的玩家身份信息: {identity_text}"
+                f"This is the previous game content, saved in JSON format, with each entry representing a conversation: {history_text}\n"
+                f"These are the players who are currently alive: {living_text}\n"
+                f"This is the player identity information that you already know: {identity_text}"
                 f"{self.output_day}"
         )
         
-        output = single_chat(content=content,role=role_text)
+        output = self.chat(content=content,role=role_text)
         try:
             response = json.loads(output)
         except:
@@ -167,7 +168,7 @@ class ProphetAgent():
         
         wolf_name = response["name"]
         speak = response["speak"]
-        session = f"我是 {self.name}, 我认为{wolf_name}是狼人，我是这么想的,{speak}"
+        session = f"I am  {self.name}, I think {wolf_name} is wolf, here is what I thought: {speak}"
         print(f"{self.name}, {response}")
         return wolf_name, session
 
@@ -178,13 +179,13 @@ class ProphetAgent():
         name_text = f"你是{self.name}"
         role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         content = (
-                f"这是之前的游戏内容，保存为json格式，每一条是一次对话：{history_text}\n"
-                f"这是当前还活着的玩家：{living_text}\n"
-                f"这是你已经知道的玩家身份信息: {identity_text}"
+                f"This is the previous game content, saved in JSON format, with each entry representing a conversation: {history_text}\n"
+                f"These are the players who are currently alive:{living_text}\n"
+                f"This is the player identity information that you already know: {identity_text}"
                 f"{self.output_check}"
         )
         
-        output = single_chat(content=content,role=role_text)
+        output = self.chat(content=content,role=role_text)
         try:
             response = json.loads(output)
         except:
@@ -195,4 +196,4 @@ class ProphetAgent():
         return check_name
 
     def update_identity(self, name, identity):
-        self.identity_list.append(f"我知道 {name} 是一个 {identity}")
+        self.identity_list.append(f"I know {name} is {identity}")

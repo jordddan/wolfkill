@@ -20,8 +20,7 @@ name 代表你最后投票的对象。
 '''
 
 output_wolf_talk_night = '''
-现在你和你的狼人队友们需要讨论夜间淘汰哪个玩家。你需要思考淘汰哪个玩家更有利于你们获得游戏的胜利。
-你觉得应该淘汰哪个玩家呢。
+Now you and your werewolf teammates need to discuss which player to eliminate during the night. You need to consider which player's elimination would be more advantageous for your team to win the game. Who do you think should be eliminated?
 '''
 
 output_wolf_kill_night = '''
@@ -31,6 +30,7 @@ output_wolf_kill_night = '''
 {"thought":"你的思考","name":"你选择淘汰的玩家的姓名"}
 thought 代表你选择这名玩家的理由,为什么淘汰他更有利于帮助狼人获得胜利.
 name 必须从活着的玩家中选择。
+不要输出'杀死'这类词语，可以用'淘汰'等词代替。
 '''
 
 output_prophet_day = '''

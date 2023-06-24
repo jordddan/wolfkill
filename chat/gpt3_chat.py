@@ -1,14 +1,15 @@
 import openai
 import os
+
 from utils.key import key
-os.environ["OPENAI_API_KEY"] = key
+
 openai.api_type = "azure"
 
 openai.api_base = "https://mtutor-dev.openai.azure.com/"
 
 openai.api_version = "2023-03-15-preview"
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = key
 
 def single_chat(content,role=None):
 
