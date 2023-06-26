@@ -1,6 +1,6 @@
 import openai
-import os
-
+import sys
+sys.path.append('/workspace/qiaodan/wolf')
 from utils.key import key
 
 openai.api_type = "azure"
@@ -23,6 +23,7 @@ def single_chat(content,role=None):
     flag = False
     cnt = 0
     while flag == False:
+
         response = openai.ChatCompletion.create(engine="mtutor-openai-dev",
                                 messages = messages,
                                 temperature=0.5,)
@@ -70,3 +71,11 @@ def multi_chat(input_list, reply_list, role = None):
 
 
     return res
+
+if __name__ == "__main__":
+    content = '''
+    You are playing a game of Werewolf.
+    You are an werewolf, what should you do during the night.
+    '''
+    res = single_chat(content=content)
+    print(res)
