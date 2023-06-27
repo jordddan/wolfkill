@@ -58,7 +58,7 @@ class WolfAgent:
 
         history_text = json.dumps(history,ensure_ascii=False,indent=2)
         living_text = json.dumps(living_players,ensure_ascii=False,indent=2)
-        name_text = f"You are {self.name}"
+        name_text = f"你是 {self.name}"
         role_text = f"{game_intro} \n {name_text}, {self.role_prompt}\n "
         team_mate_text = json.dumps(wolf_team_mate,ensure_ascii=False,indent=2)
 
